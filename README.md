@@ -5,7 +5,7 @@ This repository represents the optimized version of the baseline web application
 Key improvements include performance optimization and API-centric refactoring.
 
 ## Related Repository
-- Baseline Implementation: https://github.com/your-username/springboot-jpa-web-application
+- Baseline Implementation: https://github.com/hyejin0916/springboot-jpa-web-application
 
 ## Features & Improvements
 - 성능 최적화: 쿼리 튜닝, 캐싱 적용, 효율적인 DB 접근
