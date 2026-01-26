@@ -9,18 +9,36 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequiredArgsConstructor
 public class MemberApiController {
 
     private final MemberService memberService;
 
+    @GetMapping("api/v1/members")
+    public List<Member> membersV1() {
+        return memberService.findMembers();
+    } // 실무에서는 사용하지 않음, DTO를 통해 응답 정의 권장
+
+    @GetMapping("api/v2/members")
+    public Result membersV2() {
+        List<Member> findMembers = memberService.findMembers();
+        List<MemberDto> collect = findMembers.stream()
+                .map(m -> new MemberDto(m.getName()))
+                .collect(Collectors.toList());
+
+        return new Result(collect);
+    }
+
     @PostMapping("/api/v1/members")
     public CreateMemberResponse saveMemberV1(@RequestBody @Valid Member member) {
         // 요청 본문을 객체로 변환하고(@RequestBody), Bean Validation을 통해 입력값을 검증(@Valid)
         Long id = memberService.join(member);
         return new CreateMemberResponse(id);
-    }
+    } // 실무에서는 사용하지 않음, DTO를 통해 요청 및 응답 정의 권장
 
     @PostMapping("/api/v2/members")
     public CreateMemberResponse saveMemberV2(@RequestBody @Valid CreateMemberRequest request) {
@@ -44,6 +62,18 @@ public class MemberApiController {
     /**
      * [실무] DTO는 다른 파일로 분리
      */
+    @Data
+    @AllArgsConstructor
+    static class Result<T> {
+        private T data;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class MemberDto {
+        private String name;
+    }
+
     @Data
     static class CreateMemberRequest {
         @NotEmpty
