@@ -39,17 +39,31 @@ public class OrderApiController {
         return all;
     }
 
-    /** V2. 엔티티를 조회해서 DTO로 변환(fetch join 사용X)
+    /**
+     * V2. 엔티티를 조회해서 DTO로 변환(fetch join 사용X)
      * - 트랜잭션 안에서 지연 로딩 필요
      * - 지연 로딩으로 너무 많은 SQL 실행
      */
     @GetMapping("/api/v2/orders")
     public List<OrderDto> ordersV2() {
         List<Order> orders = orderRepository.findAll(new OrderSearch());
-        List<OrderDto> collect = orders.stream()
+        List<OrderDto> result = orders.stream()
                 .map(o -> new OrderDto(o))
                 .collect(Collectors.toList());
-        return collect;
+        return result;
+    }
+
+    /**
+     * V3. 엔티티를 조회해서 DTO로 변환(fetch join 사용O)
+     * hibernate 6.x부터 distinct 자동 적용 -> 데이터 중복 현상 해결, 페이징 문제는 해결 X
+     */
+    @GetMapping("/api/v3/orders")
+    public List<OrderDto> ordersV3() {
+        List<Order> orders = orderRepository.findAllWithItem();
+        List<OrderDto> result = orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(Collectors.toList());
+        return result;
     }
 
     @Data
