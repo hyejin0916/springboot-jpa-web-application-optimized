@@ -49,8 +49,25 @@ public class OrderSimpleApiController {
      */
     @GetMapping("/api/v2/simple-orders")
     public List<SimpleOrderDto> ordersV2() {
+        // ORDER 2건
+        // N + 1 -> 1 + 회원 N + 배송 N
         List<Order> orders = orderRepository.findAll(new OrderSearch());
 
+        List<SimpleOrderDto> result = orders.stream()
+                .map(o -> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
+    /**
+     *
+     * V3. 엔티티를 조회해서 DTO로 변환(fetch join 사용O)
+     * - fetch join으로 쿼리 1번 호출
+     */
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> orderV3() {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
         List<SimpleOrderDto> result = orders.stream()
                 .map(o -> new SimpleOrderDto(o))
                 .collect(Collectors.toList());
@@ -67,11 +84,11 @@ public class OrderSimpleApiController {
         private Address address;
 
         public SimpleOrderDto(Order order) {
-            orderId = order.getId();
-            name = order.getMember().getName(); // LAZY 초기화 -> 쿼리 발생
-            orderDate = order.getOrderDate();
-            orderStatus = order.getStatus();
-            address = order.getDelivery().getAddress(); // LAZY 초기화 -> 쿼리 발생
+            this.orderId = order.getId();
+            this.name = order.getMember().getName(); // LAZY 초기화 -> 쿼리 발생
+            this.orderDate = order.getOrderDate();
+            this.orderStatus = order.getStatus();
+            this.address = order.getDelivery().getAddress(); // LAZY 초기화 -> 쿼리 발생
         }
     }
 }
